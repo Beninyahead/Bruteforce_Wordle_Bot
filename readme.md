@@ -10,7 +10,7 @@ Bruteforce Algorithm:
 
 Algorithm is handled in the WordHandler class. 
 The process is as follow: 
-1) The first two guess are optimized words for elimination, words sourced form www.wired.com [here.](https://www.wired.com/story/best-wordle-tips/#:~:text=If%20you%20start,with%20SENOR%2C%20DUCAT)
+1) The first two guess are optimized words for elimination, words sourced form [wired.com's article here.](https://www.wired.com/story/best-wordle-tips/#:~:text=If%20you%20start,with%20SENOR%2C%20DUCAT)
 2) iterate through word list, for each word:
     * If the word does not contain a known value at the known index, remove it from the list.
     * If the word does not contian a present letter, remove it form the list.
@@ -25,7 +25,7 @@ An instance of the WordHandler class is encapsulated here for ease of updating k
 
 Within the check letters method, if each letter of the guess is reported as correct on the keyboard it is assumed that the guess was correct. There is a chance that this could be inaccurate on some occasions. 
 
-Note: To select the keyboard data i used a regular expresion logic and scripts to selected the sub elements within the shadow tree. This logic was sourced from another project. Credit to github user [Polidori-112](https://github.com/Polidori-112), checkout his Wordle_Bot [here.](https://github.com/Polidori-112/Wordle_Bot).  
+Note: To select the keyboard data i used a regular expresion logic and scripts to selected the sub elements within the shadow tree. This logic was sourced from another project. Credit to github user [Polidori-112](https://github.com/Polidori-112), checkout his Wordle_Bot [here](https://github.com/Polidori-112/Wordle_Bot).
 
 Word Lists
 ----------
