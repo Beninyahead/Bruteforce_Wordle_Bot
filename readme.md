@@ -14,7 +14,7 @@ Bruteforce Algorithm:
 
 Algorithm is handled in the WordHandler class. 
 The process is as follow: 
-1) The first two guess are optimized words for elimination, words sourced form [wired.com's article here.](https://www.wired.com/story/best-wordle-tips/#:~:text=If%20you%20start,with%20SENOR%2C%20DUCAT)
+1) The first two guess are optimized words for elimination, words sourced from [wired.com's article here.](https://www.wired.com/story/best-wordle-tips/#:~:text=If%20you%20start,with%20SENOR%2C%20DUCAT)
 2) iterate through word list, for each word:
     * If the word does not contain a known value at the known index, remove it from the list.
     * If the word does not contian a present letter, remove it form the list.
