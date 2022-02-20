@@ -5,6 +5,10 @@ Python bot created with Selenium that finds the word of the day through process 
 * If it does not, a new browser session is launched to continue solving. 
 
 
+</img>
+<img src = "demo.gif", alt = "wordle", height = "350">
+
+
 Bruteforce Algorithm:
 ----------------------
 
