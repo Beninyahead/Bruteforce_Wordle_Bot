@@ -1,6 +1,6 @@
 # Bruteforce_Wordle_Bot
-Python bot created with Selenium that finds the word of the day through process of elimintaiton. main.py is the entry point to the bot.
-
+Python bot created with Selenium that finds the word of the day through process of elimintaiton. 
+* main.py is the entry point to the bot.
 * 70% of the time the bot should find the word within the 6 attempts. 
 * If it does not, a new browser session is launched to continue solving. 
 
@@ -35,3 +35,9 @@ Word Lists
 ----------
 The word list is all 5 letter words downloaded from [The Stanford GraphBase: A Platform for Combinatorial Computing](https://www-cs-faculty.stanford.edu/~knuth/sgb.html). 
 I thought it would be two easy to use the same words as Wordle.
+
+References
+---
+* [www.wired.com](https://www.wired.com/story/best-wordle-tips/#:~:text=If%20you%20start,with%20SENOR%2C%20DUCAT)
+* [The Stanford GraphBase: A Platform for Combinatorial Computing](https://www-cs-faculty.stanford.edu/~knuth/sgb.html). 
+
