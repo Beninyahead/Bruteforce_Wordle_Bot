@@ -8,7 +8,7 @@ word_handler = WordHandler(FILEPATH)
 webdriver = WordleWebDriver(word_handler)
 
 
-while webdriver.word_of_the_day == None: 
+while webdriver.word_of_the_day is None: 
     guess = word_handler.guess_a_word()
     # check guess count is about to go over the limit: 
     if word_handler.count > ATTEMPTS and word_handler.count % ATTEMPTS == 1:

@@ -11,7 +11,7 @@ class WordHandler:
     """
    
     def __init__(self, filepath:str) -> None:
-        """Initilised the word list, reading the file path to self.available_words
+        """Initialized the word list, reading the file path to self.available_words
 
         Args:
             filepath (str): File path to to a txt file of line seperated 5 letter words.
