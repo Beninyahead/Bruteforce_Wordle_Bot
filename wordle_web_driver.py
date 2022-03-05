@@ -17,15 +17,22 @@ class WordleWebDriver:
     * Each method has a 2sec delay after interacting with the site.
     * Session must be quit manually by using browser.quit().
     """
-    def __init__(self, word_handler:WordHandler) -> None:
+    
+    def __init__(self, word_handler:WordHandler, display_page=True) -> None:
         """ Initialization a browser session is initialized. 
 
         Args:
             word_handler (WordHandler): WordHandler instance.
         """
         self.word_handler: WordHandler = word_handler
-        self.browser = webdriver.Chrome(executable_path=DRIVER_PATH)
         self.word_of_the_day: str = None 
+        
+        # Set up driver
+        options = webdriver.ChromeOptions()
+        if not display_page:
+            options.headless = True
+        self.browser = webdriver.Chrome(executable_path=DRIVER_PATH, options=options)
+        
         self.browser.get(URL_ENDPOINT)
     
         time.sleep(1)
