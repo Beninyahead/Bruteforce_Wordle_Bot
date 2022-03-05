@@ -1,5 +1,7 @@
+from datetime import date 
 from word_handler import WordHandler
 from wordle_web_driver import WordleWebDriver
+from notify import send_sms_notification
 
 ATTEMPTS = 6
 FILEPATH = 'word_list.txt'
@@ -21,6 +23,8 @@ while webdriver.word_of_the_day is None:
     webdriver.check_letters(guess)
     word_handler.filter_word_list()
 
-
-print(f"Word was {webdriver.word_of_the_day}")
 webdriver.browser.quit()
+
+message = f'Wordle for {date.today()} is "{webdriver.word_of_the_day.upper()}", got it on guess number {word_handler.count}.'
+print(message)
+send_sms_notification(message)
