@@ -6,7 +6,7 @@ from notify import send_sms_notification
 ATTEMPTS = 6
 FILEPATH = 'word_list.txt'
 
-display_page = False
+display_page = True
 
 word_handler = WordHandler(FILEPATH)
 webdriver = WordleWebDriver(word_handler,display_page)
@@ -30,5 +30,5 @@ webdriver.browser.quit()
 message = f'Wordle for {date.today()} is "{webdriver.word_of_the_day.upper()}", '\
           f'got it on guess number {word_handler.count}, '\
           f'number of available words remaining were {len(word_handler.available_words)}.'
-print(message)
-# send_sms_notification(message)
+# print(message)
+send_sms_notification(message)
