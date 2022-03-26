@@ -48,6 +48,8 @@ class WordleWebDriver:
         Args:
             word (str): The guessed word.
         """
+        # Delete the previous word if it wasn't in the word list
+        self.page_element.send_keys(Keys.BACKSPACE, Keys.BACKSPACE, Keys.BACKSPACE, Keys.BACKSPACE, Keys.BACK_SPACE)
         self.page_element.send_keys(word + Keys.ENTER)
         time.sleep(2)
 

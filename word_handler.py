@@ -107,4 +107,6 @@ class WordHandler:
                 self.absent_letters.clear()
                 self.known_letters.clear()
                 self.present_letters.clear()
+                self.guess_a_word()
+        self.__remove_word(guess)
         return guess

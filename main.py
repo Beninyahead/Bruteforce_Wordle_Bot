@@ -6,8 +6,10 @@ from notify import send_sms_notification
 ATTEMPTS = 6
 FILEPATH = 'word_list.txt'
 
+display_page = False
+
 word_handler = WordHandler(FILEPATH)
-webdriver = WordleWebDriver(word_handler)
+webdriver = WordleWebDriver(word_handler,display_page)
 
 
 while webdriver.word_of_the_day is None: 
@@ -17,7 +19,7 @@ while webdriver.word_of_the_day is None:
         print('reseting game instance')
         # reboot the driver, starting a new instance
         webdriver.browser.quit()
-        webdriver = WordleWebDriver(word_handler)
+        webdriver = WordleWebDriver(word_handler, display_page)
     # Send and check data
     webdriver.send_word(guess)
     webdriver.check_letters(guess)
@@ -25,6 +27,8 @@ while webdriver.word_of_the_day is None:
 
 webdriver.browser.quit()
 
-message = f'Wordle for {date.today()} is "{webdriver.word_of_the_day.upper()}", got it on guess number {word_handler.count}.'
+message = f'Wordle for {date.today()} is "{webdriver.word_of_the_day.upper()}", '\
+          f'got it on guess number {word_handler.count}, '\
+          f'number of available words remaining were {len(word_handler.available_words)}.'
 print(message)
-send_sms_notification(message)
+# send_sms_notification(message)
