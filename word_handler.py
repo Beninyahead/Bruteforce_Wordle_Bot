@@ -96,17 +96,26 @@ class WordHandler:
         if self.count == 1:
             guess = random.choice(FIRST_GUESS_WORDS)
             self.first_word_index = FIRST_GUESS_WORDS.index(guess) 
+            self.__remove_word(guess)
+            return guess
         elif self.count == 2:
             guess = SECOND_GUESS_WORDS[self.first_word_index]
+            self.__remove_word(guess)
+            return guess
         else:
             try:
                 guess = random.choice(self.available_words)
+                self.__remove_word(guess)
             except IndexError:
-                # Something has gone wrong with filtering. Reload the list and try again.
-                self.__read_words()
-                self.absent_letters.clear()
-                self.known_letters.clear()
-                self.present_letters.clear()
-                self.guess_a_word()
-        self.__remove_word(guess)
-        return guess
+                # either somthing went wrong with filtering, or word is not in word list.
+                return None 
+            else:               
+                return guess
+                
+    @property
+    def closet_word(self):
+        """Build word string from known indexes"""
+        word = ['?','?','?','?','?']
+        for letter, index in self.known_letters.items():
+            word[index] = letter
+        return "".join([letter for letter in word])
