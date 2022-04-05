@@ -1,7 +1,10 @@
+import logging
 import random
 
 FIRST_GUESS_WORDS = ['notes','resin','tares','senor']
 SECOND_GUESS_WORDS = ['acrid','loath','chino','ducat']
+
+logger = logging.getLogger(__name__)
 
 class WordHandler:
     """* WordHandler loads a list of words form a word file
@@ -28,6 +31,7 @@ class WordHandler:
 
     def __read_words(self):
         """Read file to list"""
+        logger.debug(f"reading data from {self.file_path}")
         with open(self.file_path, mode='r', encoding='utf-8') as file:
             data = file.readlines()
             self.available_words = [word.strip().lower() for word in data] 
@@ -76,6 +80,7 @@ class WordHandler:
         """Brute force Iterate through words, cleansing list"""
         # Repeat 10 times to ensure no words are missed,
         # this is due to a bug in my logic, where the word list does not filter completley on the first iteration
+        logger.info("Filtering word list")
         for _ in range(10):
             for word in self.available_words:
                 self.__remove_words_containing_unavailable_letters(word)

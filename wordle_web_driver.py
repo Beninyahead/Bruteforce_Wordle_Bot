@@ -1,7 +1,11 @@
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
+import logging
 import time
 import re
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+
+logger = logging.getLogger(__name__)
 
 from word_handler import WordHandler
 # Module constants
@@ -50,6 +54,7 @@ class WordleWebDriver:
         """
         # Delete the previous word if it wasn't in the word list
         self.page_element.send_keys(Keys.BACKSPACE, Keys.BACKSPACE, Keys.BACKSPACE, Keys.BACKSPACE, Keys.BACK_SPACE)
+        logger.info(f"Sending word: {word}")
         self.page_element.send_keys(word + Keys.ENTER)
         time.sleep(2)
 
@@ -69,6 +74,33 @@ class WordleWebDriver:
         
         return self.browser.execute_script("return arguments[0].innerHTML;",keys)
 
+    def check_win(self, word):
+        """Extract Game Board data as html, use REGEX to check if 'win' exists.
+        if 'win' exists, then game is won
+
+        Args:
+            word (str): the word just sent across to wordle.
+
+        Returns:
+            Bool: True if game has been won, else False
+        """
+        logger.debug("checking if game has been won")
+        game_app = self.browser.find_element_by_tag_name("game-app")
+        game = self.browser.execute_script("return arguments[0].shadowRoot.getElementById('game')", game_app)
+        board_container = game.find_element_by_id('board-container')
+        board = board_container.find_element_by_id('board')
+        # extract inner html of board for regex
+        game_row_data = self.browser.execute_script("return arguments[0].innerHTML;",board)
+        check_win = [key[-3:] for key in WIN_REGEX.findall(game_row_data)]
+        if check_win:
+            logger.info(f"Game Won. Word {word}")
+            self.word_of_the_day = word
+            # keep screen open for win
+            time.sleep(1)
+            return True
+        logger.debug("Game still active")
+        return False
+
     def __update_known_letters(self, word:str, correct_letters:list):
         """Update known letter index positions. 
         Does not handle duplicate letters in word.
@@ -78,33 +110,19 @@ class WordleWebDriver:
             correct_letters (list): list of keyboard correct letters
         """
         # Update known indexes, do not overwrite existing, does not handle duplicate letters in word:
+        logger.info(f"Check for new known indexes for word: {word}")
         for letter in correct_letters:
-            try:
-                letter_position = word.index(letter)
-            except ValueError:
-                pass
-            if letter not in self.word_handler.known_letters:
-                self.word_handler.known_letters[letter] = letter_position
-
-    def __check_correct_letters(self, word:str, correct_letters:list):
-        """Counts the number of correct letters exist in the word just sent to wordle.
-        This method is to handle words that have duplicate letters. There is a chance the results could be incorrect, but very close.
-
-        Args:
-            word (str): The word just sent to wordle.
-            correct_letters (list): list of keyboard correct letters
-
-        Returns:
-            int: count of number of correct letters in the word
-        """
-        #check if word is correct
-        correct_letters_count = 0
-        for letter in word:
-            # check if each letter in the word is in the keyboard as correct.
-            # this is to handle duplicate letters in a word. There is a chance that this could be incorrect.
-            if letter in correct_letters:
-                correct_letters_count = correct_letters_count + 1  
-        return correct_letters_count
+            letter_count = word.count(letter)
+            if letter_count > 1:
+                self.word_handler.present_letters.append(letter)
+            else:
+                try:
+                    letter_position = word.index(letter)
+                except ValueError:
+                    pass
+                else:
+                    if letter not in self.word_handler.known_letters:
+                        self.word_handler.known_letters[letter] = letter_position
     
     def check_letters(self, word:str):
         """Compares the keyboard data to the word using regex to select data. 
@@ -115,20 +133,19 @@ class WordleWebDriver:
         Updates: 
             self.word_handler: known_letters, present_letters and absent_letter lists are updated.
         """
+        logger.info("Extracting and checking keyboard data")
         keyboard_data = self.__extract_keyboard_data()
         correct_letters = [key[0] for key in CORRECT_REGEX.findall(keyboard_data)]
+        self.__update_known_letters(word, correct_letters)       
+        # update present and unavailable letters
+        for key in PRESENT_REGEX.findall(keyboard_data):
+            if key[0] not in self.word_handler.present_letters:
+                self.word_handler.present_letters.append(key[0]) 
 
-        correct_letters_count = self.__check_correct_letters(word, correct_letters)
+        for key in ABSENT_REGEX.findall(keyboard_data):
+            if key[0] not in self.word_handler.absent_letters:
+                self.word_handler.absent_letters.append(key[0]) 
 
-        if correct_letters_count == 5:
-            self.word_of_the_day = word
-            time.sleep(1) # Keep screen active for displaying win
-        else:
-            self.__update_known_letters(word, correct_letters)       
-            # update present and unavailable letters
-            self.word_handler.present_letters = [key[0] for key in PRESENT_REGEX.findall(keyboard_data)]
-            self.word_handler.absent_letters = [key[0] for key in ABSENT_REGEX.findall(keyboard_data)]
-
-            print(f"Correct Letter {correct_letters}, Present Letters {self.word_handler.present_letters}, Absent letters{self.word_handler.absent_letters}")
+        logger.info(f"Correct Letters {self.word_handler.known_letters}\nPresent Letters {self.word_handler.present_letters}.\nAbsent letters{self.word_handler.absent_letters}")
     
 

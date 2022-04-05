@@ -1,6 +1,9 @@
 import os
+import logging
 from twilio.rest import Client
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -13,7 +16,7 @@ def send_sms_notification(content:str):
     """
     Sends a sms to default number with a provided message
     """
-    print('Sending text message')
+    logger.info('Sending text message')
     client = Client(ACCOUNT_SID, AUTH_TOKEN)
     message = client.messages \
                     .create(
@@ -21,4 +24,4 @@ def send_sms_notification(content:str):
                         from_ = TWILLO_FROM,
                         to = TWILLO_TO
                     )
-    print(message.status)           
+    logger.info(f"Message Status: {message.status}")           
