@@ -86,7 +86,6 @@ class WordHandler:
                 self.__remove_words_containing_unavailable_letters(word)
                 self.__remove_words_without_known_values(word)
                 self.__remove_words_without_present_values(word)
-            #print(f"Word list filtered to: {len(self.available_words)}")
 
     def guess_a_word(self):
         """Selects a random word from wordlists based on self.count
@@ -97,7 +96,7 @@ class WordHandler:
             str: a 5 letter word.
         """
         self.count = self.count  + 1
-        print(f"Word List length = {len(self.available_words)}")
+        logger.info(f"Word List length = {len(self.available_words)}")
         if self.count == 1:
             guess = random.choice(FIRST_GUESS_WORDS)
             self.first_word_index = FIRST_GUESS_WORDS.index(guess) 

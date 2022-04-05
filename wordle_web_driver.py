@@ -62,7 +62,7 @@ class WordleWebDriver:
         """Find and extract keyboard data from browser instance
 
         Returns:
-            selenium html attribute: keyboard data 
+            str: Inner HTML keyboard data 
         """
         # Select Keyboard data
         game_app = self.browser.find_element_by_tag_name("game-app")
@@ -113,8 +113,9 @@ class WordleWebDriver:
         logger.info(f"Check for new known indexes for word: {word}")
         for letter in correct_letters:
             letter_count = word.count(letter)
-            if letter_count > 1:
-                self.word_handler.present_letters.append(letter)
+            if letter_count >= 2:
+                if letter not in self.word_handler.present_letters:
+                    self.word_handler.present_letters.append(letter)
             else:
                 try:
                     letter_position = word.index(letter)
@@ -123,6 +124,7 @@ class WordleWebDriver:
                 else:
                     if letter not in self.word_handler.known_letters:
                         self.word_handler.known_letters[letter] = letter_position
+        logger.info(f"Correct Letters {self.word_handler.known_letters}.")
     
     def check_letters(self, word:str):
         """Compares the keyboard data to the word using regex to select data. 
@@ -136,16 +138,18 @@ class WordleWebDriver:
         logger.info("Extracting and checking keyboard data")
         keyboard_data = self.__extract_keyboard_data()
         correct_letters = [key[0] for key in CORRECT_REGEX.findall(keyboard_data)]
+        
         self.__update_known_letters(word, correct_letters)       
+        
         # update present and unavailable letters
         for key in PRESENT_REGEX.findall(keyboard_data):
             if key[0] not in self.word_handler.present_letters:
                 self.word_handler.present_letters.append(key[0]) 
-
+        logger.info(f"Present Letters {self.word_handler.present_letters}.")
+        
         for key in ABSENT_REGEX.findall(keyboard_data):
             if key[0] not in self.word_handler.absent_letters:
                 self.word_handler.absent_letters.append(key[0]) 
-
-        logger.info(f"Correct Letters {self.word_handler.known_letters}\nPresent Letters {self.word_handler.present_letters}.\nAbsent letters{self.word_handler.absent_letters}")
+        logger.info(f"Absent letters {self.word_handler.absent_letters}")
     
 

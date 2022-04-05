@@ -1,8 +1,13 @@
 import logging
+import os
+
+LOG_FOLDER = 'logs'
+LOGFILE = 'wordle.log'
+os.makedirs(LOG_FOLDER, exist_ok=True)
 
 # set up logging to file
 logging.basicConfig(
-     filename='logs/wordle.log',
+     filename=f'{LOG_FOLDER}/{LOGFILE}',
      level=logging.INFO, 
      format= "[%(asctime)s] - {%(name)s - %(levelname)s} - %(message)s",
      datefmt='%Y-%m-%d %H:%M:%S'
@@ -17,3 +22,4 @@ console.setFormatter(formatter)
 logging.getLogger('').addHandler(console)
 
 logger = logging.getLogger(__name__)
+
