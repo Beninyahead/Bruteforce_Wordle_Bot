@@ -78,14 +78,11 @@ class WordHandler:
 
     def filter_word_list(self):
         """Brute force Iterate through words, cleansing list"""
-        # Repeat 10 times to ensure no words are missed,
-        # this is due to a bug in my logic, where the word list does not filter completley on the first iteration
         logger.info("Filtering word list")
-        for _ in range(10):
-            for word in self.available_words:
-                self.__remove_words_containing_unavailable_letters(word)
-                self.__remove_words_without_known_values(word)
-                self.__remove_words_without_present_values(word)
+        for word in self.available_words[:]:
+            self.__remove_words_containing_unavailable_letters(word)
+            self.__remove_words_without_known_values(word)
+            self.__remove_words_without_present_values(word)
 
     def guess_a_word(self):
         """Selects a random word from wordlists based on self.count
