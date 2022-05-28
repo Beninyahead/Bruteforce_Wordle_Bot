@@ -3,7 +3,7 @@ import logging
 import set_up_logging  
 from word_handler import WordHandler
 from wordle_web_driver import WordleWebDriver
-from notify import send_sms_notification
+from notify import send_twillo_sms_notification, send_textbelt_sms_notification
 
 # Process constants
 ATTEMPTS = 6
@@ -47,4 +47,6 @@ else:
 
 logger.info(f"Message: {message}")
 
-# send_sms_notification(message)
+# Uncomment the option you want to run for text notifications
+# send_twillo_sms_notification(message)
+# send_textbelt_sms_notification(message)
