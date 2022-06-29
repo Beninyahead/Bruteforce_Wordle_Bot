@@ -27,23 +27,28 @@ Web Driver
 The WordleWebDriver class handles all interactions with the site.
 An instance of the WordHandler class is encapsulated here for ease of updating known letter indexes, present letters and absent letters. 
 * display_page boolean toggles wether the chrome driver should run in the background or not.
+* Web Driver handles all the interactions with the page, such as sending words and extracting data. 
 
-Within the check letters method, if each letter of the guess is reported as correct on the keyboard it is assumed that the guess was correct. There is a chance that this could be inaccurate on some occasions. 
 
-Note: To select the keyboard data i used a regular expresion logic and scripts to selected the sub elements within the shadow tree. This logic was sourced from another project. Credit to github user [Polidori-112](https://github.com/Polidori-112), checkout his Wordle_Bot [here](https://github.com/Polidori-112/Wordle_Bot).
-
-notify.py - send_sms_notification
+notify.py - send_sms_notification functions
 ----------------------------------
-* Optional. Will send a text message to your default number, can be used of scheduled otherwise the print statement will suffice.  
+<i>Optional</i> 
+
+* `send_twillo_sms_notification` Will send a text message to your default number, can be used of scheduled otherwise the print statement will suffice.  
 Dependencies: 
-Twillo is deppended on the .env file saved in root folder. Contents of .env file below:
+Twillo function is deppendent on the .env file saved in root folder. Contents of .env file below:
 ```
 TWILIO_ACCOUNT_SID=Your_Twillo_Account_SID
 TWILIO_AUTH_TOKEN=Your_Twillo_Auth_Token
 TWILLO_FROM=Your_Tiwllo_From_Number
 TWILLO_TO=Your_Twillo_To_Number
 ```
-
+* `send_textbelt_sms_notification` Will send a text message to your default number, can be used of scheduled otherwise the print statement will suffice.  
+Dependencies: 
+Textbelt function is also deppendent on the .env file, but just the to number, this can be changed to suit your needs.
+```
+TWILLO_TO=Your_Twillo_To_Number
+```
 Word Lists
 ----------
 The word list is all 5 letter words downloaded from [The Stanford GraphBase: A Platform for Combinatorial Computing](https://www-cs-faculty.stanford.edu/~knuth/sgb.html). 

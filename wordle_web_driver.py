@@ -1,9 +1,10 @@
 import logging
 import time
-import re
+
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import NoSuchElementException
 
 logger = logging.getLogger(__name__)
 
@@ -11,10 +12,6 @@ from word_handler import WordHandler
 # Module constants
 DRIVER_PATH = "C:/Development/chromedriver.exe" # Check out the Selenium documentation for the app.
 URL_ENDPOINT ='https://www.nytimes.com/games/wordle/index.html'  
-CORRECT_REGEX = re.compile('...............correct', re.VERBOSE)
-PRESENT_REGEX = re.compile('...............present', re.VERBOSE)
-ABSENT_REGEX = re.compile('...............absent', re.VERBOSE)
-WIN_REGEX = re.compile('...............win', re.VERBOSE)
 
 class WordleWebDriver:
     """Selenium Webdriver to interact with Wordle.
@@ -40,7 +37,8 @@ class WordleWebDriver:
         self.browser.get(URL_ENDPOINT)
     
         time.sleep(1)
-        self.page_element = self.browser.find_element_by_tag_name('html')
+        self.page_element = self.browser.find_element(By.TAG_NAME, 'html')
+        print(self.page_element)
 
         self.page_element.click()
 
@@ -58,25 +56,23 @@ class WordleWebDriver:
         self.page_element.send_keys(word + Keys.ENTER)
         time.sleep(2)
 
-    def __extract_keyboard_data(self):
-        """Find and extract keyboard data from browser instance
-
+    def __extract_keyboard_data(self, data_state:str) -> list[str]:
+        """* Find keyboard browser instance
+        * Extact keyboard button data for given data-state as a list 
+        
+        Args:
+            data_state (str): The data-state of the keyboard key value (`correct`, `present`, `absent`).
+        
         Returns:
-            str: Inner HTML keyboard data 
+            list[str]: List of letters matching the given data-state 
         """
-        # Select Keyboard data
-        game_app = self.browser.find_element_by_tag_name("game-app")
-        game = self.browser.execute_script("return arguments[0].shadowRoot.getElementById('game')", game_app)
-        keyboard = game.find_element_by_tag_name("game-keyboard")
-        keys = self.browser.execute_script("return arguments[0].shadowRoot.getElementById('keyboard')", keyboard)
-        
-        time.sleep(2)
-        
-        return self.browser.execute_script("return arguments[0].innerHTML;",keys)
+        keyboard = self.browser.find_element(By.CLASS_NAME, 'Keyboard-module_keyboard__1HSnn')
+        keys = keyboard.find_elements(By.TAG_NAME, 'button')
+        return [key.get_attribute('data-key') for key in keys if key.get_attribute('data-state') == data_state]
 
-    def check_win(self, word):
-        """Extract Game Board data as html, use REGEX to check if 'win' exists.
-        if 'win' exists, then game is won
+
+    def check_win(self, word) -> bool:
+        """* Use selenium `find_element` `By.CLASS_NAME` to check if a game row has been won
 
         Args:
             word (str): the word just sent across to wordle.
@@ -85,23 +81,19 @@ class WordleWebDriver:
             Bool: True if game has been won, else False
         """
         logger.debug("checking if game has been won")
-        game_app = self.browser.find_element_by_tag_name("game-app")
-        game = self.browser.execute_script("return arguments[0].shadowRoot.getElementById('game')", game_app)
-        board_container = game.find_element_by_id('board-container')
-        board = board_container.find_element_by_id('board')
-        # extract inner html of board for regex
-        game_row_data = self.browser.execute_script("return arguments[0].innerHTML;",board)
-        check_win = [key[-3:] for key in WIN_REGEX.findall(game_row_data)]
-        if check_win:
-            logger.info(f"Game Won. Word {word}")
-            self.word_of_the_day = word
-            # keep screen open for win
-            time.sleep(1)
-            return True
-        logger.debug("Game still active")
-        return False
+        board = self.browser.find_element(By.CLASS_NAME, 'Board-module_board__lbzlf')
+        try:
+            board.find_element(By.CLASS_NAME, 'Row-module_win__NF7uy')
+        except NoSuchElementException:
+            logger.debug("Game still active")
+            return False
+        logger.info(f"Game Won. Word {word}")
+        self.word_of_the_day = word
+        # keep screen open for win
+        time.sleep(1)
+        return True
 
-    def __update_known_letters(self, word:str, correct_letters:list):
+    def __update_known_letters(self, word:str, correct_letters:list) -> None:
         """Update known letter index positions. 
         Does not handle duplicate letters in word.
 
@@ -126,9 +118,9 @@ class WordleWebDriver:
                         self.word_handler.known_letters[letter] = letter_position
         logger.info(f"Correct Letters {self.word_handler.known_letters}.")
     
-    def check_letters(self, word:str):
-        """Compares the keyboard data to the word using regex to select data. 
-        if all letters int the word are marked as correct, it is assumed the game is over.
+    def check_letters(self, word:str) -> None:
+        """* Compares the keyboard data to the word. Updates `word_handler`
+        
         Args:
             word (str): The word sent to Wordle in self.send_word(word).
 
@@ -136,20 +128,17 @@ class WordleWebDriver:
             self.word_handler: known_letters, present_letters and absent_letter lists are updated.
         """
         logger.info("Extracting and checking keyboard data")
-        keyboard_data = self.__extract_keyboard_data()
-        correct_letters = [key[0] for key in CORRECT_REGEX.findall(keyboard_data)]
-        
-        self.__update_known_letters(word, correct_letters)       
+        self.__update_known_letters(word, self.__extract_keyboard_data(data_state='correct'))       
         
         # update present and unavailable letters
-        for key in PRESENT_REGEX.findall(keyboard_data):
-            if key[0] not in self.word_handler.present_letters:
-                self.word_handler.present_letters.append(key[0]) 
+        for letter in self.__extract_keyboard_data(data_state='present'):
+            if letter not in self.word_handler.present_letters:
+                self.word_handler.present_letters.append(letter) 
         logger.info(f"Present Letters {self.word_handler.present_letters}.")
         
-        for key in ABSENT_REGEX.findall(keyboard_data):
-            if key[0] not in self.word_handler.absent_letters:
-                self.word_handler.absent_letters.append(key[0]) 
+        for letter in self.__extract_keyboard_data(data_state='absent'):
+            if letter not in self.word_handler.absent_letters:
+                self.word_handler.absent_letters.append(letter) 
         logger.info(f"Absent letters {self.word_handler.absent_letters}")
     
 
