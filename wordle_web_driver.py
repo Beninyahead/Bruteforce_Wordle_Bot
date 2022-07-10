@@ -8,7 +8,6 @@ from selenium.common.exceptions import NoSuchElementException
 
 logger = logging.getLogger(__name__)
 
-from word_handler import WordHandler
 # Module constants
 DRIVER_PATH = "C:/Development/chromedriver.exe" # Check out the Selenium documentation for the app.
 URL_ENDPOINT ='https://www.nytimes.com/games/wordle/index.html'  
@@ -19,13 +18,12 @@ class WordleWebDriver:
     * Session must be quit manually by using browser.quit().
     """
     
-    def __init__(self, word_handler:WordHandler, display_page=True) -> None:
+    def __init__(self, display_page=True) -> None:
         """ Initialization a browser session is initialized. 
 
         Args:
-            word_handler (WordHandler): WordHandler instance.
+            display_page (bool): True to show the browser instance, False to hide. defaults to True.
         """
-        self.word_handler: WordHandler = word_handler
         self.word_of_the_day: str = None 
         
         # Set up driver
@@ -44,7 +42,7 @@ class WordleWebDriver:
 
         time.sleep(1)
 
-    def send_word(self, word:str):
+    def send_word(self, word:str) -> None:
         """Sends keys for guessed word to Wordle.
 
         Args:
@@ -56,19 +54,28 @@ class WordleWebDriver:
         self.page_element.send_keys(word + Keys.ENTER)
         time.sleep(2)
 
-    def __extract_keyboard_data(self, data_state:str) -> list[str]:
-        """* Find keyboard browser instance
-        * Extact keyboard button data for given data-state as a list 
-        
+    def extract_word_row_data(self, word:str) -> dict[int, tuple[str, str]]:
+        """* Find all game row elements
+        * Locate row for word just sent
+        * iterate ove the row for each key index, extract is data-state
+        * Return a Dictionary containing the results  
+
         Args:
-            data_state (str): The data-state of the keyboard key value (`correct`, `present`, `absent`).
-        
+            word (str): word just sent to wordle
+
         Returns:
-            list[str]: List of letters matching the given data-state 
+            dict[int, tuple[str, str]]: indexed results of word eg: `{0 : (letter, data-state)}` 
         """
-        keyboard = self.browser.find_element(By.CLASS_NAME, 'Keyboard-module_keyboard__1HSnn')
-        keys = keyboard.find_elements(By.TAG_NAME, 'button')
-        return [key.get_attribute('data-key') for key in keys if key.get_attribute('data-state') == data_state]
+        word_index_pair = {}
+        rows = self.browser.find_elements(By.CLASS_NAME, 'Row-module_row__dEHfN')
+        for row in rows:
+            letters = row.find_elements(By.CLASS_NAME, 'Tile-module_tile__3ayIZ')
+            row_word = ''.join([row.text for row in letters])
+            if row_word.upper() == word.upper():
+                for index, letter in enumerate(letters):
+                    state = str(letter.get_attribute('data-state'))
+                    word_index_pair[index] = (letter.text.lower(), state)
+        return word_index_pair
 
 
     def check_win(self, word) -> bool:
@@ -92,53 +99,4 @@ class WordleWebDriver:
         # keep screen open for win
         time.sleep(1)
         return True
-
-    def __update_known_letters(self, word:str, correct_letters:list) -> None:
-        """Update known letter index positions. 
-        Does not handle duplicate letters in word.
-
-        Args:
-            word (str): the word just sent across to wordle.
-            correct_letters (list): list of keyboard correct letters
-        """
-        # Update known indexes, do not overwrite existing, does not handle duplicate letters in word:
-        logger.info(f"Check for new known indexes for word: {word}")
-        for letter in correct_letters:
-            letter_count = word.count(letter)
-            if letter_count >= 2:
-                if letter not in self.word_handler.present_letters:
-                    self.word_handler.present_letters.append(letter)
-            else:
-                try:
-                    letter_position = word.index(letter)
-                except ValueError:
-                    pass
-                else:
-                    if letter not in self.word_handler.known_letters:
-                        self.word_handler.known_letters[letter] = letter_position
-        logger.info(f"Correct Letters {self.word_handler.known_letters}.")
-    
-    def check_letters(self, word:str) -> None:
-        """* Compares the keyboard data to the word. Updates `word_handler`
-        
-        Args:
-            word (str): The word sent to Wordle in self.send_word(word).
-
-        Updates: 
-            self.word_handler: known_letters, present_letters and absent_letter lists are updated.
-        """
-        logger.info("Extracting and checking keyboard data")
-        self.__update_known_letters(word, self.__extract_keyboard_data(data_state='correct'))       
-        
-        # update present and unavailable letters
-        for letter in self.__extract_keyboard_data(data_state='present'):
-            if letter not in self.word_handler.present_letters:
-                self.word_handler.present_letters.append(letter) 
-        logger.info(f"Present Letters {self.word_handler.present_letters}.")
-        
-        for letter in self.__extract_keyboard_data(data_state='absent'):
-            if letter not in self.word_handler.absent_letters:
-                self.word_handler.absent_letters.append(letter) 
-        logger.info(f"Absent letters {self.word_handler.absent_letters}")
-    
 
