@@ -15,7 +15,7 @@ logger.info(f"Starting Wordle for today {date.today()}")
 # Process variables
 display_page = False
 word_handler = WordHandler(FILEPATH)
-webdriver = WordleWebDriver(word_handler,display_page)
+webdriver = WordleWebDriver(display_page)
 is_solved = False
 
 while not is_solved: 
@@ -27,13 +27,15 @@ while not is_solved:
         logger.info('Gone over attempts, reseting game instance')
         # reboot the driver, starting a new instance
         webdriver.browser.quit()
-        webdriver = WordleWebDriver(word_handler, display_page)
+        webdriver = WordleWebDriver(display_page)
     # Send and check data
     webdriver.send_word(guess)
     if webdriver.check_win(guess):
         is_solved = True
         break
-    webdriver.check_letters(guess)
+    # Extract data and update word handler.
+    data = webdriver.extract_word_row_data(guess)
+    word_handler.update_indexes(data)
     word_handler.filter_word_list()
 
 webdriver.browser.quit()
