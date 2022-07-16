@@ -109,7 +109,7 @@ class WordHandler:
             letter = results[0]
             state = results[1]
             # for duplicate letters, if absent letter is also marked as present or correct skip it.
-            if state == 'absent' and letter not in corrrect_present_letters:
+            if state == 'absent' and letter not in corrrect_present_letters and letter not in self.absent_letters:
                 self.absent_letters.append(letter)
             elif state == 'correct':
                 self.known_letters[letter] = index 
