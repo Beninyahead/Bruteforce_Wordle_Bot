@@ -6,11 +6,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import NoSuchElementException
 
-logger = logging.getLogger(__name__)
+from .configs.config import DRIVER_PATH, URL_ENDPOINT
 
-# Module constants
-DRIVER_PATH = "C:/Development/chromedriver.exe" # Check out the Selenium documentation for the app.
-URL_ENDPOINT ='https://www.nytimes.com/games/wordle/index.html'  
+logger = logging.getLogger(__name__)
 
 class WordleWebDriver:
     """Selenium Webdriver to interact with Wordle.
@@ -36,8 +34,6 @@ class WordleWebDriver:
     
         time.sleep(1)
         self.page_element = self.browser.find_element(By.TAG_NAME, 'html')
-        print(self.page_element)
-
         self.page_element.click()
 
         time.sleep(1)
