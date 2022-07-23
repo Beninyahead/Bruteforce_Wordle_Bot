@@ -21,7 +21,7 @@ CHROME_DRIVER="path/to/your/chromedriver.exe"
 ## Running the Module
 * Running `--help` or `-h` will show the available arguments and default values. 
 ```shell
-python -m wordle_bot -help
+python -m wordle_bot --help
 ```
 * To run the module with the chrome instance hidden simply run the below.
 command:
